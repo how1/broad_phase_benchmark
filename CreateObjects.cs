@@ -236,7 +236,7 @@ public class CreateObjects : MonoBehaviour {
 		bool done = false;
 		HRigidBody[] tmp = FindObjectsOfType<HRigidBody> ();
 		int loop = 0;
-		float buffer = bounds / 32f;
+		float buffer = bounds / 16f;
 		float buffer2 = buffer * 2;
 		while (!done) {
 			h.transform.position = new Vector3 ((bounds - buffer2) * Random.value + buffer, (bounds - buffer2) * Random.value + buffer, (bounds - buffer2) * Random.value + buffer);

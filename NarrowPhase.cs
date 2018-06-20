@@ -335,7 +335,7 @@ public class NarrowPhase : MonoBehaviour {
 		}
 		frameCount++;
 		if (frameCount == GameControl.gameControl.samples && testing) {
-			endTest ();
+			//endTest ();
 			//timer();
 		}
 	}
