@@ -8,7 +8,8 @@ using System.IO;
 public class GameControl : MonoBehaviour {
 
 	public static GameControl gameControl;
-	public CreateObjects test;
+	[HideInInspector]
+	public CreateObjects createObjects;
 	public int bounds = 32; //size of scene
 	public int numObjects = 1; 
 	public int whichBroad = 0; //which broad-phase algorithm: 0-BruteForce, 1-SpatialMasking, 2-Oct-Tree, 3-SAP, 4-Adaptive
@@ -37,6 +38,8 @@ public class GameControl : MonoBehaviour {
 		if (gameControl == null) {
 			DontDestroyOnLoad (gameObject);
 			gameControl = this;
+			createObjects = gameObject.AddComponent<CreateObjects> ();
+
 		} else if (gameControl != this)
 			Destroy (gameObject);
 	}

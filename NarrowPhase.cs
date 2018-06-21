@@ -20,11 +20,17 @@ public class NarrowPhase : MonoBehaviour {
 	public bool testing = false;
 	public HRigidBody[] physicsEngines; 
 	public bool physics = true;
+	[HideInInspector]
 	public SpatialMasking mask;
+	[HideInInspector]
 	public Bounds boundsThing;
+	[HideInInspector]
 	public Simple simple;
+	[HideInInspector]
 	public OctTreeAlg octTree;
+	[HideInInspector]
 	public SweepAndPrune sweepAndPrune;
+	[HideInInspector]
 	public int whichBroad = 0;
 	const int SIMPLE = 0;
 	const int SPATIAL = 1;
@@ -37,14 +43,17 @@ public class NarrowPhase : MonoBehaviour {
 	int status = 0;     
 	public float COLLISIONTOLERANCE = 0.2f;
 	public float coefficientOfRestitution = 0.8f;
+	[HideInInspector]
 	public int bounds = 128;
 	Vector3 vCollisionNormal;
 	Vector3 vRelativeVelocity;
 	Vector3 planeCollisionNormal;
+	[HideInInspector]
 	public Vector3 startPos;
 	const double tol = 0.0000000000000000001f;
 	Vector3[] pointsOnPlanes;
 	Vector3[] boundsPlanes;
+	[HideInInspector]
 	public int boundsTol = 1;
 	Plane front;// = { Vector3.up, Vector3.right, pointsOnPlanes [0] };
 	Plane back;// = { Vector3.up, Vector3.right, pointsOnPlanes [5] };
@@ -66,7 +75,11 @@ public class NarrowPhase : MonoBehaviour {
 	int frameCount = 0;
 	int testNum = 0;
 	public void StartNarrowPhase () {
-		
+		mask = GetComponent<SpatialMasking> ();
+		simple = GetComponent<Simple> ();
+		octTree = GetComponent<OctTreeAlg> ();
+		sweepAndPrune = GetComponent<SweepAndPrune> ();
+		boundsThing = gameObject.AddComponent<Bounds> ();
 		//COLLISIONTOLERANCE = GameControl.gameControl.radius / 5f;
 		bounds = GameControl.gameControl.bounds;
 		whichBroad = GameControl.gameControl.whichBroad;
@@ -128,7 +141,9 @@ public class NarrowPhase : MonoBehaviour {
 			octTree.StartOctTree (GameControl.gameControl.minRadius);
 		} else if (whichBroad == SAP) {
 			sweepAndPrune.StartSweepAndPrune ();
-		} 
+		} else {
+			simple.narrowPhase = this;
+		}
 	}
 
 	void initializeVelocity(double velocity){
@@ -225,7 +240,9 @@ public class NarrowPhase : MonoBehaviour {
 	double avgNpTime = 0;
 	bool first = true;
 	int count = 0;
+	[HideInInspector]
 	public bool BpOnly = false;
+	[HideInInspector]
 	public bool BpNp = false;
 	public bool rollingAverage;
 	public void OnFixedUpdate () {

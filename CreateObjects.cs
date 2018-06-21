@@ -6,16 +6,24 @@ using UnityEngine;
 using System.IO;
 
 public class CreateObjects : MonoBehaviour {
-
+	[HideInInspector]
 	public NarrowPhase narrowPhase;
+	[HideInInspector]
 	public float offset;
+	[HideInInspector]
 	public float staticRadius;
+	[HideInInspector]
 	public int dimension;
 	int space;
+	[HideInInspector]
 	public Vector3 spacing;
+	[HideInInspector]
 	public int numOfNonStaticPart;
+	[HideInInspector]
 	public Vector3[] nonStaticPartLocs;
+	[HideInInspector]
 	public float nonstaticRadius;
+	[HideInInspector]
 	public float mass;
 	Simple simple;
 	float drag;
@@ -50,8 +58,10 @@ public class CreateObjects : MonoBehaviour {
 	#endregion
 
 	void Start(){
-		GameControl.gameControl.test = this;
-		simple = FindObjectOfType<Simple> ();
+		narrowPhase = GetComponent<NarrowPhase> ();
+		//GameControl.gameControl.createObjects = this;
+		simple = gameObject.GetComponent<Simple>();
+		simple.narrowPhase = narrowPhase;
 		mass = GameControl.gameControl.objectMass;
 		speed = GameControl.gameControl.speed;
 		drag = GameControl.gameControl.drag;
