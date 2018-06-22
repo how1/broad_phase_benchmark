@@ -11,6 +11,7 @@ using System;
 public class SpatialMasking : MonoBehaviour {
 
 	//public BoundsSpheres boundsSpheres;
+	[HideInInspector]
 	public NarrowPhase narrowPhase;
 	public ulong[,] bitmasks;
 	//public HRigidBody[] narrowPhase.physicsEngines;
@@ -23,6 +24,7 @@ public class SpatialMasking : MonoBehaviour {
 	bool asdf = false;
 
 	public void StartMasking (float avgRadius) {
+		narrowPhase = GetComponent<NarrowPhase> ();
 		totalRange = narrowPhase.bounds;
 		if (totalRange / (avgRadius * 2) < 64) {
 			cellSize = avgRadius * 2;

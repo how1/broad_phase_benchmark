@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Simple : MonoBehaviour {
-
+	[HideInInspector]
 	public NarrowPhase narrowPhase;
 	public int count= 0;
 

@@ -4,18 +4,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using UnityEngine.UI;
 
 public class CreateObjects : MonoBehaviour {
-
+	[HideInInspector]
 	public NarrowPhase narrowPhase;
+	[HideInInspector]
 	public float offset;
+	[HideInInspector]
 	public float staticRadius;
+	[HideInInspector]
 	public int dimension;
 	int space;
+	[HideInInspector]
 	public Vector3 spacing;
+	[HideInInspector]
 	public int numOfNonStaticPart;
+	[HideInInspector]
 	public Vector3[] nonStaticPartLocs;
+	[HideInInspector]
 	public float nonstaticRadius;
+	[HideInInspector]
 	public float mass;
 	Simple simple;
 	float drag;
@@ -25,6 +34,7 @@ public class CreateObjects : MonoBehaviour {
 	public float averageRadius = 0;
 	float maxRadius = 0;
 	float minRadius = 0;
+	bool start = true;
 
 	//string fileName = "TimeTest1.dat";
 	//StreamWriter sr;
@@ -32,7 +42,7 @@ public class CreateObjects : MonoBehaviour {
 	int frames = 0;
 	bool write = true;
 
-
+	public Material mat;
 	int frameCount = 0;
 	float nextUpdate = 0.0f;
 	float fps = 0.0f;
@@ -50,8 +60,14 @@ public class CreateObjects : MonoBehaviour {
 	#endregion
 
 	void Start(){
-		GameControl.gameControl.test = this;
-		simple = FindObjectOfType<Simple> ();
+		makeObjects ();
+	}
+
+	public void makeObjects(){
+		narrowPhase = GetComponent<NarrowPhase> ();
+		//GameControl.gameControl.createObjects = this;
+		simple = gameObject.GetComponent<Simple>();
+		simple.narrowPhase = narrowPhase;
 		mass = GameControl.gameControl.objectMass;
 		speed = GameControl.gameControl.speed;
 		drag = GameControl.gameControl.drag;
@@ -68,14 +84,14 @@ public class CreateObjects : MonoBehaviour {
 		while (count < dimension) {
 			GameObject particle = GameObject.CreatePrimitive (PrimitiveType.Sphere);
 			float radius = GameControl.gameControl.radius;
-			//radius += Random.value * radiusRange;
+			radius += Random.value * radiusRange;
 			//float radius = radiusRandomizer ();
 			if (radius > maxRadius)
 				maxRadius = radius;
 			if (radius < minRadius)
 				minRadius = radius;
 			particle.transform.localScale = new Vector3 (radius * 2, radius * 2, radius * 2);
-			particle.GetComponent<Renderer> ().material.color = Color.red;
+			particle.GetComponent<MeshRenderer> ().material = mat;
 			particle.name = "Sphere (" + count + ")";
 			count++;
 			HRigidBody h = particle.AddComponent<HRigidBody> ();
@@ -87,8 +103,13 @@ public class CreateObjects : MonoBehaviour {
 			averageRadius += radius;
 				
 			narrowPhase.bounds = GameControl.gameControl.bounds;
-
-			distributeObject (h);
+			int i = distributeObject (h);
+			if (i == 1){
+				Text msg = GameObject.FindGameObjectWithTag ("ErrorText").GetComponent<Text>();
+				msg.text = "Error: Too many objects for bounding volume: Use fewer objects, enlarge area size, or make radius smaller";
+				start = false;
+				break;
+			}
 			int[] direction = { -1, 1 };
 			float speedRange = 0f;
 			h.velocityVector = new Vector3 (direction [Random.Range (0, 2)]
@@ -169,9 +190,10 @@ public class CreateObjects : MonoBehaviour {
 		GameControl.gameControl.avgRadius = averageRadius;
 		GameControl.gameControl.maxRadius = maxRadius;
 		GameControl.gameControl.minRadius = minRadius;
+		HRigidBody[] tmp = FindObjectsOfType<HRigidBody> ();
+		float avgVol = (4f / 3f) * Mathf.PI * (Mathf.Pow (averageRadius, 3f));
 		#region variance test
 
-		float avgVol = (4f / 3f) * Mathf.PI * Mathf.Pow (averageRadius, 3f);
 		float percObjVol = (dimension * avgVol)/(bounds * bounds * bounds);
 		GameControl.gameControl.percObjVol = percObjVol;
 		/*
@@ -210,7 +232,8 @@ public class CreateObjects : MonoBehaviour {
 		*/
 		#endregion
 		//StartCoroutine (timer ());
-		narrowPhase.StartNarrowPhase ();
+		if (start)
+			narrowPhase.StartNarrowPhase ();
 
 	}
 	/*
@@ -229,10 +252,11 @@ public class CreateObjects : MonoBehaviour {
 	}
 	*/
 	void FixedUpdate(){
-		narrowPhase.OnFixedUpdate ();
+		if (start)
+			 narrowPhase.OnFixedUpdate ();
 	}
 
-	void distributeObject(HRigidBody h){
+	int distributeObject(HRigidBody h){
 		bool done = false;
 		HRigidBody[] tmp = FindObjectsOfType<HRigidBody> ();
 		int loop = 0;
@@ -257,8 +281,15 @@ public class CreateObjects : MonoBehaviour {
 					done = false;
 				}
 			}
+			loop++;
+			Debug.Log (loop);
+			if (loop > 100) {
+				Debug.Log (loop + "over");
+				return 1;
+			}
 		}
 		h.oldPosition = h.transform.position;
+		return 0;
 	}
 
 	bool CheckBoundingBoxes(HRigidBody a1, HRigidBody b1){
