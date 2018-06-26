@@ -24,7 +24,10 @@ public class GameControl : MonoBehaviour {
 	//public int spacing = 3;
 	public string fileName = "NTimeTest0"; //file being written to if testing (NarrowPhase.testing)
 	public float objectMass = 1.0f; //object mass
-	//public float massRange = 0f;
+	public bool gravity;
+	[Range(0,1)]
+	public float cof;
+	public float colTol;
 	public int samples = 0; //number of frames averaged per test run
 	public float prevTime = 0;
 	public AudioSource audioSource; //tells you when test is done

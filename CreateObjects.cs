@@ -42,6 +42,7 @@ public class CreateObjects : MonoBehaviour {
 	//timing variables
 	int frames = 0;
 	bool write = true;
+	bool start;
 
 	public Material mat;
 	int frameCount = 0;
@@ -61,16 +62,7 @@ public class CreateObjects : MonoBehaviour {
 	#endregion
 
 	void Start(){
-		makeObjects ();
-	}
-
-	public void makeObjects(){
-		narrowPhase = GetComponent<NarrowPhase> ();
-		//GameControl.gameControl.createObjects = this;
-		simple = gameObject.GetComponent<Simple>();
-		simple.narrowPhase = narrowPhase;
 		mass = GameControl.gameControl.objectMass;
-		//massRange = GameControl.gameControl.massRange;
 		speed = GameControl.gameControl.speed;
 		drag = GameControl.gameControl.drag;
 		bounds = GameControl.gameControl.bounds;
@@ -86,19 +78,16 @@ public class CreateObjects : MonoBehaviour {
 		while (count < dimension) {
 			GameObject particle = GameObject.CreatePrimitive (PrimitiveType.Sphere);
 			float radius = GameControl.gameControl.radius;
-			radius += Random.value * radiusRange;
 			//float radius = radiusRandomizer ();
 			if (radius > maxRadius)
 				maxRadius = radius;
 			if (radius < minRadius)
 				minRadius = radius;
 			particle.transform.localScale = new Vector3 (radius * 2, radius * 2, radius * 2);
-			particle.GetComponent<MeshRenderer> ().material = mat;
 			particle.name = "Sphere (" + count + ")";
 			count++;
 			HRigidBody h = particle.AddComponent<HRigidBody> ();
 			h.mass = mass;
-			//h.mass = radius * massRange;
 			h.velocityExponent = 2.0f;
 			h.drag = drag;
 			h.isStatic = false;
@@ -106,13 +95,6 @@ public class CreateObjects : MonoBehaviour {
 			averageRadius += radius;
 				
 			narrowPhase.bounds = GameControl.gameControl.bounds;
-			int i = distributeObject (h);
-			if (i == 1){
-				Text msg = GameObject.FindGameObjectWithTag ("ErrorText").GetComponent<Text>();
-				msg.text = "Error: Too many objects for bounding volume: Use fewer objects, enlarge area size, or make radius smaller";
-				start = false;
-				break;
-			}
 			int[] direction = { -1, 1 };
 			float speedRange = 0f;
 			h.velocityVector = new Vector3 (direction [Random.Range (0, 2)]
@@ -285,6 +267,11 @@ public class CreateObjects : MonoBehaviour {
 				}
 			}
 			loop++;
+			Debug.Log (loop);
+			if (loop > 100) {
+				Debug.Log (loop + "over");
+				return 1;
+			}
 			if (loop > 100) {
 				return 1;
 			}
