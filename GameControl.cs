@@ -8,8 +8,6 @@ using System.IO;
 public class GameControl : MonoBehaviour {
 
 	public static GameControl gameControl;
-	[HideInInspector]
-	public CreateObjects createObjects;
 	public int bounds = 32; //size of scene
 	public int numObjects = 1; 
 	public int whichBroad = 0; //which broad-phase algorithm: 0-BruteForce, 1-SpatialMasking, 2-Oct-Tree, 3-SAP, 4-Adaptive
@@ -30,8 +28,6 @@ public class GameControl : MonoBehaviour {
 	public float speed; //speed of objects (speed^2 * 3)^(1/2) = m/s
 	public int testNum = 0; //can determine file name
 	public int repetition = 0;
-	public float cof = 0.8f;
-	public bool gravity;
 	//public int objectRadius;
 	//public StreamWriter sr;
 	bool open = false;
@@ -40,7 +36,6 @@ public class GameControl : MonoBehaviour {
 		if (gameControl == null) {
 			DontDestroyOnLoad (gameObject);
 			gameControl = this;
-			createObjects = FindObjectOfType<CreateObjects> ();
 		} else if (gameControl != this)
 			Destroy (gameObject);
 	}

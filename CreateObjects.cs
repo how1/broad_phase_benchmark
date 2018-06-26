@@ -4,27 +4,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using UnityEngine.UI;
 
 public class CreateObjects : MonoBehaviour {
-	[HideInInspector]
 	public NarrowPhase narrowPhase;
-	[HideInInspector]
 	public float offset;
-	[HideInInspector]
 	public float staticRadius;
-	[HideInInspector]
 	public int dimension;
 	int space;
-	[HideInInspector]
 	public Vector3 spacing;
-	[HideInInspector]
 	public int numOfNonStaticPart;
-	[HideInInspector]
 	public Vector3[] nonStaticPartLocs;
-	[HideInInspector]
 	public float nonstaticRadius;
-	[HideInInspector]
 	public float mass;
 	Simple simple;
 	float drag;
@@ -34,7 +24,6 @@ public class CreateObjects : MonoBehaviour {
 	public float averageRadius = 0;
 	float maxRadius = 0;
 	float minRadius = 0;
-	bool start = true;
 
 	//string fileName = "TimeTest1.dat";
 	//StreamWriter sr;
@@ -42,7 +31,6 @@ public class CreateObjects : MonoBehaviour {
 	int frames = 0;
 	bool write = true;
 
-	public Material mat;
 	int frameCount = 0;
 	float nextUpdate = 0.0f;
 	float fps = 0.0f;
