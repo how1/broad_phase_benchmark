@@ -34,8 +34,6 @@ public class GameControl : MonoBehaviour {
 	public float speed; //speed of objects (speed^2 * 3)^(1/2) = m/s
 	public int testNum = 0; //can determine file name
 	public int repetition = 0;
-	public float cof = 0.8f;
-	public bool gravity;
 	//public int objectRadius;
 	//public StreamWriter sr;
 	bool open = false;

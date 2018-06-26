@@ -42,7 +42,6 @@ public class CreateObjects : MonoBehaviour {
 	//timing variables
 	int frames = 0;
 	bool write = true;
-	bool start;
 
 	public Material mat;
 	int frameCount = 0;
