@@ -24,7 +24,7 @@ public class GameControl : MonoBehaviour {
 	//public int spacing = 3;
 	public string fileName = "NTimeTest0"; //file being written to if testing (NarrowPhase.testing)
 	public float objectMass = 1.0f; //object mass
-	public bool gravity;
+	public bool gravity = true;
 	[Range(0,1)]
 	public float cof;
 	public float colTol;
