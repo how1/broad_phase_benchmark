@@ -8,7 +8,7 @@ using UnityEngine;
 using System.Diagnostics;
 
 public class SweepAndPrune : MonoBehaviour {
-
+	[HideInInspector]
 	public NarrowPhase narrowPhase;
 	HRigidBody[] objects;
 	public float tol = 0.2f;
@@ -48,6 +48,7 @@ public class SweepAndPrune : MonoBehaviour {
 
 	// Use this for initialization
 	public void StartSweepAndPrune () {
+		narrowPhase = GetComponent<NarrowPhase> ();
 		BpOnly = narrowPhase.BpOnly;
 		BpNp = narrowPhase.BpNp;
 		objects = narrowPhase.physicsEngines;

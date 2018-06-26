@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Bounds : MonoBehaviour {
-
+	[HideInInspector]
 	public NarrowPhase narrowPhase;
 	public HRigidBody[] physicsEngines;
 	public Transform[] objects;
@@ -18,6 +18,7 @@ public class Bounds : MonoBehaviour {
 
 	// Use this for initialization
 	public void StartBounds () {
+		narrowPhase = GetComponent<NarrowPhase> ();
 		physicsEngines = narrowPhase.physicsEngines;
 		//directions = new Vector3[physicsEngines.Length];
 		foreach (HRigidBody s in physicsEngines) {

@@ -11,10 +11,12 @@ public class OctTreeAlg : MonoBehaviour {
 	public bool draw = false;
 	BoundingBox uBounds;
 	public OctTree octTree;
+	[HideInInspector]
 	public NarrowPhase narrowPhase;
 	List<HRigidBody> tmp;
 
 	public void StartOctTree(float avgRadius){
+		narrowPhase = GetComponent<NarrowPhase> ();
 		minSize = avgRadius * 2;
 		bounds = narrowPhase.bounds;
 		tmp = new List<HRigidBody> ();
