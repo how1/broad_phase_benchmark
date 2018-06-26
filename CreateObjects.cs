@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using UnityEngine.UI;
 
 public class CreateObjects : MonoBehaviour {
 	public NarrowPhase narrowPhase;
@@ -30,6 +31,7 @@ public class CreateObjects : MonoBehaviour {
 	//timing variables
 	int frames = 0;
 	bool write = true;
+	bool start;
 
 	int frameCount = 0;
 	float nextUpdate = 0.0f;
@@ -79,7 +81,7 @@ public class CreateObjects : MonoBehaviour {
 			if (radius < minRadius)
 				minRadius = radius;
 			particle.transform.localScale = new Vector3 (radius * 2, radius * 2, radius * 2);
-			particle.GetComponent<MeshRenderer> ().material = mat;
+			particle.GetComponent<MeshRenderer> ().material.color = Color.red;
 			particle.name = "Sphere (" + count + ")";
 			count++;
 			HRigidBody h = particle.AddComponent<HRigidBody> ();

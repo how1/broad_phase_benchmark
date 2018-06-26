@@ -108,12 +108,12 @@ public class NarrowPhase : MonoBehaviour {
 
 		};
 
-		front = new Plane( "front", Vector3.right, Vector3.up, new Vector3 (0, 0, 1) );
-		back = new Plane ( "back", Vector3.up, Vector3.right, new Vector3 (0, 0, bounds - boundsTol) );
-		left = new Plane ( "left", Vector3.up, Vector3.forward, new Vector3 (1, 0, 0) );
-		right = new Plane ( "right", Vector3.forward, Vector3.up, new Vector3 (bounds-boundsTol, 0, 0) );
-		top = new Plane ("top", Vector3.right, Vector3.forward, new Vector3 (0, bounds-boundsTol, 0));
-		bottom = new Plane ( "bottom", Vector3.forward, Vector3.right, new Vector3 (0, 1, 0) );
+		front = new Plane ("front", Vector3.right, Vector3.up, new Vector3 (0, 0, 1));
+		back = new Plane ("back", Vector3.up, Vector3.right, new Vector3 (0, 0, bounds - boundsTol));
+		left = new Plane ("left", Vector3.up, Vector3.forward, new Vector3 (1, 0, 0));
+		right = new Plane ("right", Vector3.forward, Vector3.up, new Vector3 (bounds - boundsTol, 0, 0));
+		top = new Plane ("top", Vector3.right, Vector3.forward, new Vector3 (0, bounds - boundsTol, 0));
+		bottom = new Plane ("bottom", Vector3.forward, Vector3.right, new Vector3 (0, 1, 0));
 		planeIndices = new [] { top, bottom, front, back, left, right };
 		#endregion
 
@@ -127,8 +127,8 @@ public class NarrowPhase : MonoBehaviour {
 			octTree.StartOctTree (GameControl.gameControl.minRadius);
 		} else if (whichBroad == SAP) {
 			sweepAndPrune.StartSweepAndPrune ();
+		}
 	}
-
 	void initializeVelocity(double velocity){
 		for (int i = 0; i < physicsEngines.Length; i++) {
 			//int randIndex = Random.Range (0, 2);
