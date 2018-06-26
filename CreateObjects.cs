@@ -43,7 +43,6 @@ public class CreateObjects : MonoBehaviour {
 	int frames = 0;
 	bool write = true;
 
-	public Material mat;
 	int frameCount = 0;
 	float nextUpdate = 0.0f;
 	float fps = 0.0f;
@@ -71,6 +70,8 @@ public class CreateObjects : MonoBehaviour {
 		//spacing = new Vector3 (space, space, space);
 		dimension = GameControl.gameControl.numObjects;
 		nextUpdate = Time.time;
+		narrowPhase = GetComponent<NarrowPhase> ();
+		narrowPhase.bounds = GameControl.gameControl.bounds;
 		definePlanes (bounds);
 		int count = 0;
 
@@ -84,6 +85,7 @@ public class CreateObjects : MonoBehaviour {
 				minRadius = radius;
 			particle.transform.localScale = new Vector3 (radius * 2, radius * 2, radius * 2);
 			particle.name = "Sphere (" + count + ")";
+			particle.GetComponent<MeshRenderer> ().material.color = Color.red;
 			count++;
 			HRigidBody h = particle.AddComponent<HRigidBody> ();
 			h.mass = mass;
@@ -92,8 +94,7 @@ public class CreateObjects : MonoBehaviour {
 			h.isStatic = false;
 			h.radius = radius;
 			averageRadius += radius;
-				
-			narrowPhase.bounds = GameControl.gameControl.bounds;
+			distributeObject (h);
 			int[] direction = { -1, 1 };
 			float speedRange = 0f;
 			h.velocityVector = new Vector3 (direction [Random.Range (0, 2)]
