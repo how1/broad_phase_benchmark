@@ -9,6 +9,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System.IO;
 using System.Diagnostics;
 using UnityEngine.SceneManagement;
@@ -26,6 +27,7 @@ public class NarrowPhase : MonoBehaviour {
 	public OctTreeAlg octTree;
 	public SweepAndPrune sweepAndPrune;
 //	public SpatialMaskingGravity spatialGravity;
+	n2Gravity n2Grav;
 	public int whichBroad = 0;
 	const int SIMPLE = 0;
 	const int SPATIAL = 1;
@@ -68,6 +70,7 @@ public class NarrowPhase : MonoBehaviour {
 	int testNum = 0;
 	public void StartNarrowPhase () {
 		COLLISIONTOLERANCE = GameControl.gameControl.colTol;
+		coefficientOfRestitution = GameControl.gameControl.cof;
 		bounds = GameControl.gameControl.bounds;
 		Camera mainCamera = FindObjectOfType<Camera>();
 		mainCamera.transform.position = new Vector3(0-bounds/2, bounds/2, 0-bounds/2);
@@ -136,8 +139,8 @@ public class NarrowPhase : MonoBehaviour {
 		} else if (whichBroad == SAP) {
 			sweepAndPrune.StartSweepAndPrune ();
 		}
+		n2Grav = GetComponent<n2Gravity> ();
 		if (GameControl.gameControl.objectGravity) {
-			n2Gravity n2Grav = GetComponent<n2Gravity> ();
 			n2Grav.StartN2Gravity ();
 //			spatialGravity = GetComponent<SpatialMaskingGravity>();
 //			spatialGravity.StartMasking (GameControl.gameControl.bounds / 4);
@@ -159,66 +162,66 @@ public class NarrowPhase : MonoBehaviour {
 		}
 	}
 	int adaptBroad = 1;
-	public void Adaptive(){
-		if (adaptBroad != 1 && GameControl.gameControl.percObjVol * avgVelocity > 0.3f) {
-			//GameControl.gameControl.whichBroad = 1;
-			adaptBroad = 1;
-			mask.StartMasking (GameControl.gameControl.avgRadius);
-		} else if (adaptBroad != 3 && avgVelocity <= 50 && avgVelocity > 10) {
-			//GameControl.gameControl.whichBroad = 3;
-			adaptBroad = 3;
-			sweepAndPrune.StartSweepAndPrune ();
-		} else if (adaptBroad != 2 && avgVelocity <= 10) {
-			adaptBroad = 2;
-			octTree.StartOctTree (GameControl.gameControl.minRadius);
-		}
-		GameControl.gameControl.adaptBroad = adaptBroad;
-		if (adaptBroad == SPATIAL) {
-			stopwatch = Stopwatch.StartNew ();
-			mask.searchForCollisions ();
-			if (BpOnly) {
-				stopwatch.Stop ();
-				processCollisionObjects ();
-			} else if (BpNp) {
-				stopwatch.Stop ();
-				broadPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-				stopwatch = Stopwatch.StartNew ();
-				processCollisionObjects ();
-				stopwatch.Stop ();
-				narrowPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-			} else {
-				processCollisionObjects ();
-				stopwatch.Stop ();
-			}
-			lapTime = stopwatch.Elapsed.TotalMilliseconds;
-		} else if (adaptBroad == OCTTREE) {
-			stopwatch = Stopwatch.StartNew ();
-			octTree.RestartOctTree ();
-			if (BpOnly) {
-				stopwatch.Stop ();
-				processCollisionObjects ();
-			} else if (BpNp) {
-				stopwatch.Stop ();
-				broadPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-				stopwatch = Stopwatch.StartNew ();
-				processCollisionObjects ();
-				stopwatch.Stop ();
-				narrowPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-			} else {
-				processCollisionObjects ();
-				stopwatch.Stop ();
-			}
-			lapTime = stopwatch.Elapsed.TotalMilliseconds;
-		} else if (adaptBroad == SAP) {
-			double[] lapTimes = sweepAndPrune.getSAPCollisions ();
-			if (BpNp) {
-				broadPhaseTime = lapTimes [0];
-				narrowPhaseTime = lapTimes [1];
-			} else {
-				lapTime = lapTimes [0];
-			}
-		}
-	}
+//	public void Adaptive(){
+//		if (adaptBroad != 1 && GameControl.gameControl.percObjVol * avgVelocity > 0.3f) {
+//			//GameControl.gameControl.whichBroad = 1;
+//			adaptBroad = 1;
+//			mask.StartMasking (GameControl.gameControl.avgRadius);
+//		} else if (adaptBroad != 3 && avgVelocity <= 50 && avgVelocity > 10) {
+//			//GameControl.gameControl.whichBroad = 3;
+//			adaptBroad = 3;
+//			sweepAndPrune.StartSweepAndPrune ();
+//		} else if (adaptBroad != 2 && avgVelocity <= 10) {
+//			adaptBroad = 2;
+//			octTree.StartOctTree (GameControl.gameControl.minRadius);
+//		}
+//		GameControl.gameControl.adaptBroad = adaptBroad;
+//		if (adaptBroad == SPATIAL) {
+//			stopwatch = Stopwatch.StartNew ();
+//			mask.searchForCollisions ();
+//			if (BpOnly) {
+//				stopwatch.Stop ();
+//				processCollisionObjects ();
+//			} else if (BpNp) {
+//				stopwatch.Stop ();
+//				broadPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
+//				stopwatch = Stopwatch.StartNew ();
+//				processCollisionObjects ();
+//				stopwatch.Stop ();
+//				narrowPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
+//			} else {
+//				processCollisionObjects ();
+//				stopwatch.Stop ();
+//			}
+//			lapTime = stopwatch.Elapsed.TotalMilliseconds;
+//		} else if (adaptBroad == OCTTREE) {
+//			stopwatch = Stopwatch.StartNew ();
+//			octTree.RestartOctTree ();
+//			if (BpOnly) {
+//				stopwatch.Stop ();
+//				processCollisionObjects ();
+//			} else if (BpNp) {
+//				stopwatch.Stop ();
+//				broadPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
+//				stopwatch = Stopwatch.StartNew ();
+//				processCollisionObjects ();
+//				stopwatch.Stop ();
+//				narrowPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
+//			} else {
+//				processCollisionObjects ();
+//				stopwatch.Stop ();
+//			}
+//			lapTime = stopwatch.Elapsed.TotalMilliseconds;
+//		} else if (adaptBroad == SAP) {
+//			double[] lapTimes = sweepAndPrune.getSAPCollisions ();
+//			if (BpNp) {
+//				broadPhaseTime = lapTimes [0];
+//				narrowPhaseTime = lapTimes [1];
+//			} else {
+//				lapTime = lapTimes [0];
+//			}
+//		}
+//	}
 		
 	List<double> pastLaptimes;
 	double averageTime = 0; //elapsed milliseconds * 1000 = mirco
@@ -232,12 +235,24 @@ public class NarrowPhase : MonoBehaviour {
 	public bool BpOnly = false;
 	public bool BpNp = false;
 	public bool rollingAverage;
+	public Text percGravity;
+	public Text percCollision;
+	public Text percProcess;
+	public Text percMiscillaneous;
+	int percCounter =  0;
 
 	public void OnFixedUpdate () {
-//		if (GameControl.gameControl.objectGravity) {
-//			spatialGravity.searchForCollisions ();
-//		}
-		calculateVelocityStdDev ();
+		Stopwatch totalTime = Stopwatch.StartNew ();
+		double gravityCalcTime = 0;
+		if (GameControl.gameControl.objectGravity && n2Grav.hasStarted) {
+			stopwatch = Stopwatch.StartNew ();
+			n2Grav.CalculateGravity ();
+			stopwatch.Stop ();
+			gravityCalcTime = stopwatch.Elapsed.TotalMilliseconds;
+		}
+//		calculateVelocityStdDev ();
+		double collisionCalcTime = 0;
+		stopwatch = Stopwatch.StartNew ();
 		if (GameControl.gameControl.whichBroad != whichBroad) {
 			whichBroad = GameControl.gameControl.whichBroad;
 			if (whichBroad == SPATIAL) {
@@ -248,70 +263,34 @@ public class NarrowPhase : MonoBehaviour {
 				sweepAndPrune.StartSweepAndPrune ();
 			}
 		}
+		double processTime = 0;
 		if (whichBroad == SIMPLE) {
-			stopwatch = Stopwatch.StartNew ();
 			simple.SearchForCollisions ();
-			if (BpOnly) {
-				stopwatch.Stop ();
-				processCollisionObjects ();
-			} else if (BpNp) {
-				stopwatch.Stop ();
-				broadPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-				stopwatch = Stopwatch.StartNew ();
-				processCollisionObjects ();
-				stopwatch.Stop ();
-				narrowPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-			} else {
-				processCollisionObjects ();
-				stopwatch.Stop ();
-			}
-			lapTime = stopwatch.Elapsed.TotalMilliseconds;
 		} else if (whichBroad == SPATIAL) {
-			stopwatch = Stopwatch.StartNew ();
 			mask.searchForCollisions ();
-			if (BpOnly) {
-				stopwatch.Stop ();
-				processCollisionObjects ();
-			} else if (BpNp) {
-				stopwatch.Stop ();
-				broadPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-				stopwatch = Stopwatch.StartNew ();
-				processCollisionObjects ();
-				stopwatch.Stop ();
-				narrowPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-			} else {
-				processCollisionObjects ();
-				stopwatch.Stop ();
-			}
-			lapTime = stopwatch.Elapsed.TotalMilliseconds;
 		} else if (whichBroad == OCTTREE) {
-			stopwatch = Stopwatch.StartNew ();
 			octTree.RestartOctTree ();
-			if (BpOnly) {
-				stopwatch.Stop ();
-				processCollisionObjects ();
-			} else if (BpNp) {
-				stopwatch.Stop ();
-				broadPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-				stopwatch = Stopwatch.StartNew ();
-				processCollisionObjects ();
-				stopwatch.Stop ();
-				narrowPhaseTime = stopwatch.Elapsed.TotalMilliseconds;
-			} else {
-				processCollisionObjects ();
-				stopwatch.Stop ();
-			}
-			lapTime = stopwatch.Elapsed.TotalMilliseconds;
 		} else if (whichBroad == SAP) {
-			double[] lapTimes = sweepAndPrune.getSAPCollisions ();
-			if (BpNp) {
-				broadPhaseTime = lapTimes [0];
-				narrowPhaseTime = lapTimes [1];
-			} else {
-				lapTime = lapTimes [0];
-			}
-		} else if (whichBroad == 4) {
-			Adaptive ();
+			sweepAndPrune.getSAPCollisions ();
+		} 
+//		else if (whichBroad == 4) {
+//			Adaptive ();
+//		}
+		stopwatch.Stop ();
+		collisionCalcTime = stopwatch.Elapsed.TotalMilliseconds;
+		stopwatch = Stopwatch.StartNew ();
+		if (whichBroad == SAP) {
+			processSAPCollisionObjects ();
+		} else {
+			processCollisionObjects ();
+		}
+		stopwatch.Stop ();
+		processTime = stopwatch.Elapsed.TotalMilliseconds;
+		if (whichBroad == SAP) {
+			stopwatch = Stopwatch.StartNew ();
+			sweepAndPrune.updateEndpoints ();
+			stopwatch.Stop ();
+			collisionCalcTime += stopwatch.Elapsed.TotalMilliseconds;
 		}
 		if (testing) {
 			//Record time
@@ -345,6 +324,20 @@ public class NarrowPhase : MonoBehaviour {
 		if (frameCount == GameControl.gameControl.samples && testing) {
 			//endTest ();
 			//timer();
+		}
+		totalTime.Stop ();
+		percCounter++;
+		if (percCounter == 50) {
+			double totalTimeElapsed = totalTime.Elapsed.TotalMilliseconds;
+			float percGrav = (float)(gravityCalcTime / totalTimeElapsed);
+			float percCol = (float)(collisionCalcTime / totalTimeElapsed);
+			float percProc = (float)(processTime / totalTimeElapsed);
+			float percMisc = (float)((totalTimeElapsed - (gravityCalcTime + collisionCalcTime + processTime)) / totalTimeElapsed);
+			percGravity.text = string.Format ("Gravity: {0:P2}.", percGrav);
+			percCollision.text = string.Format ("Broadphase: {0:P2}.", percCol);
+			percProcess.text = string.Format ("Narrowphase: {0:P2}.", percProc);
+			percMiscillaneous.text = string.Format ("Misc.: {0:P2}.", percMisc);
+			percCounter = 0;
 		}
 	}
 	
@@ -481,7 +474,8 @@ public class NarrowPhase : MonoBehaviour {
 	int n = 0;
 	public double avgVelocity = 0;
 	int velCount = 0;
-	public void processCollisionObjects(List<CollisionObject> collisions){
+	public void processSAPCollisionObjects(){
+		List<CollisionObject> collisions = sweepAndPrune.cols;
 		for (int i = 0; i < collisions.Count; i++) {
 			processCount++;
 			if (collisions[i].body1 && collisions[i].body2) {
@@ -498,7 +492,6 @@ public class NarrowPhase : MonoBehaviour {
 			avgVelocity += physicsEngines [i].velocityVector.magnitude;
 		}
 		avgVelocity /= physicsEngines.Length;
-
 		n++;
 		avgProcessCount = avgProcessCount + ((processCount - avgProcessCount) / n);
 	}

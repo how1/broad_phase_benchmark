@@ -73,37 +73,10 @@ public class SweepAndPrune : MonoBehaviour {
 	double lapTime;
 	double BpTime = 0;
 	double NpTime = 0;
-	public double[] getSAPCollisions(){
-		stopwatch = Stopwatch.StartNew ();
-		List<CollisionObject> cols = wallCollisions ();
+	public List<CollisionObject> cols;
+	public void getSAPCollisions(){
+		cols = wallCollisions ();
 		cols.AddRange (pm.getCollisionPairs ());
-		if (BpOnly) {
-			stopwatch.Stop ();
-			lapTime = stopwatch.Elapsed.TotalMilliseconds;
-			narrowPhase.processCollisionObjects (cols);
-			stopwatch = Stopwatch.StartNew ();
-			updateEndpoints ();
-			stopwatch.Stop ();
-			return new double[] {lapTime + stopwatch.Elapsed.TotalMilliseconds};
-		} else if (BpNp){
-			stopwatch.Stop ();
-			BpTime = stopwatch.Elapsed.TotalMilliseconds;
-			stopwatch = Stopwatch.StartNew ();
-			narrowPhase.processCollisionObjects (cols);
-			stopwatch.Stop ();
-			NpTime = stopwatch.Elapsed.TotalMilliseconds;
-			stopwatch = Stopwatch.StartNew ();
-			updateEndpoints ();
-			stopwatch.Stop ();
-			BpTime += stopwatch.Elapsed.TotalMilliseconds;
-			return new double[] { BpTime, NpTime };
-		}
-		else {
-			narrowPhase.processCollisionObjects (cols);
-			updateEndpoints ();
-			stopwatch.Stop ();
-			return new double[] {stopwatch.Elapsed.TotalMilliseconds};
-		}
 	}
 
 	public void setEndPoints(){
@@ -202,7 +175,7 @@ public class SweepAndPrune : MonoBehaviour {
 		return cols;
 	}
 
-	void updateEndpoints(){
+	public void updateEndpoints(){
 		for (int i = 0; i < objects.Length; i++) {
 			float rad = objects [i].radius;
 			Vector3 pos = objects [i].transform.position;
