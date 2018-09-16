@@ -16,7 +16,7 @@ using UnityEngine.SceneManagement;
 public class NarrowPhase : MonoBehaviour {
 
 	#region Variables
-	public bool gravity = true;
+	public float gravity = 9.8f;
 	public bool testing = false;
 	public HRigidBody[] physicsEngines; 
 	public bool physics = true;
@@ -25,6 +25,7 @@ public class NarrowPhase : MonoBehaviour {
 	public Simple simple;
 	public OctTreeAlg octTree;
 	public SweepAndPrune sweepAndPrune;
+//	public SpatialMaskingGravity spatialGravity;
 	public int whichBroad = 0;
 	const int SIMPLE = 0;
 	const int SPATIAL = 1;
@@ -45,7 +46,7 @@ public class NarrowPhase : MonoBehaviour {
 	const double tol = 0.0000000000000000001f;
 	Vector3[] pointsOnPlanes;
 	Vector3[] boundsPlanes;
-	public int boundsTol = 1;
+	public float boundsTol;
 	Plane front;// = { Vector3.up, Vector3.right, pointsOnPlanes [0] };
 	Plane back;// = { Vector3.up, Vector3.right, pointsOnPlanes [5] };
 	Plane left;// = { Vector3.up, Vector3.forward, pointsOnPlanes [0] };
@@ -66,12 +67,19 @@ public class NarrowPhase : MonoBehaviour {
 	int frameCount = 0;
 	int testNum = 0;
 	public void StartNarrowPhase () {
-		//COLLISIONTOLERANCE = GameControl.gameControl.radius / 5f;
+		COLLISIONTOLERANCE = GameControl.gameControl.colTol;
 		bounds = GameControl.gameControl.bounds;
+		Camera mainCamera = FindObjectOfType<Camera>();
+		mainCamera.transform.position = new Vector3(0-bounds/2, bounds/2, 0-bounds/2);
+		GameObject cube = GameObject.FindGameObjectWithTag ("Cube");
+		gravity = GameControl.gameControl.gravity;
+		cube.transform.localScale = new Vector3 (bounds, bounds, bounds);
+		cube.transform.position = new Vector3 (bounds/2, bounds/2, bounds/2);
+		boundsTol = COLLISIONTOLERANCE * 2f;
 		whichBroad = GameControl.gameControl.whichBroad;
 		GameControl.gameControl.fileName = testNum + "TimeTest" + whichBroad + ".dat";
 		pastLaptimes = new List<double> ();
-
+		sweepAndPrune.tol = COLLISIONTOLERANCE;
 		physicsEngines = FindObjectsOfType<HRigidBody> ();
 		if (!physics) {
 			boundsThing.StartBounds ();
@@ -128,21 +136,19 @@ public class NarrowPhase : MonoBehaviour {
 		} else if (whichBroad == SAP) {
 			sweepAndPrune.StartSweepAndPrune ();
 		}
+		if (GameControl.gameControl.objectGravity) {
+			n2Gravity n2Grav = GetComponent<n2Gravity> ();
+			n2Grav.StartN2Gravity ();
+//			spatialGravity = GetComponent<SpatialMaskingGravity>();
+//			spatialGravity.StartMasking (GameControl.gameControl.bounds / 4);
+		}
 	}
 	void initializeVelocity(double velocity){
 		for (int i = 0; i < physicsEngines.Length; i++) {
-			//int randIndex = Random.Range (0, 2);
 			int[] dirs = {-1, 1};
-			//float[] vels = new float[3];
 			float xVel = dirs[Random.Range(0,2)] * (float)(Random.value * velocity);
 			float yVel = dirs[Random.Range(0,2)] * (float)(Random.value * (velocity - xVel));
 			float zVel = dirs[Random.Range(0,2)] * (float)(velocity - Mathf.Sqrt (xVel * xVel + yVel * yVel));
-			//vels [0] = xVel;
-			//vels [1] = yVel;
-			//vels [2] = zVel;
-			//Vector3 velVec = new Vector3 ();
-			//velVec.x = vels [randIndex];
-			//vels[randIndex]
 			physicsEngines [i].velocityVector = new Vector3 (xVel, yVel, zVel);
 		}
 	}
@@ -226,7 +232,11 @@ public class NarrowPhase : MonoBehaviour {
 	public bool BpOnly = false;
 	public bool BpNp = false;
 	public bool rollingAverage;
+
 	public void OnFixedUpdate () {
+//		if (GameControl.gameControl.objectGravity) {
+//			spatialGravity.searchForCollisions ();
+//		}
 		calculateVelocityStdDev ();
 		if (GameControl.gameControl.whichBroad != whichBroad) {
 			whichBroad = GameControl.gameControl.whichBroad;
@@ -346,7 +356,6 @@ public class NarrowPhase : MonoBehaviour {
 		//check distance from body1 to the ground plane
 		d = CalcDistanceFromPointToPlane(col.body1.transform.position, col.plane.vec1, col.plane.vec2, col.plane.pop);
 		float distance = d - col.body1.radius;
-		//Debug.Log (distance);
 		float Vrn = Vector3.Dot (col.body1.velocityVector, planeCollisionNormal);
 		if (Mathf.Abs (distance) <= COLLISIONTOLERANCE && Vrn < 0.0) {
 			status = CONTACT;
@@ -385,14 +394,7 @@ public class NarrowPhase : MonoBehaviour {
 		int planesCheck = 0;
 		bool didPen = false;
 		float dt = Time.deltaTime;
-		/*
-		if (!physics) {
-			planesCheck = CheckGroundPlaneContacts (col);
-			if (planesCheck == CONTACT) {
-				ApplyImpulse (col.body1);
-			}
-		} else {
-		*/
+
 		while (tryAgain && dt > tol) {
 			tryAgain = false;
 			planesCheck = CheckGroundPlaneContacts (col);
@@ -435,8 +437,10 @@ public class NarrowPhase : MonoBehaviour {
 	}
 
 	public void stepSimulation(HRigidBody body){
-		if (gravity && !body.isStatic && body.transform.position.y > body.radius + 1) {
-			body.AddForce (body.mass * 9.8f * Vector3.down);
+		if ((gravity > 0) && !body.isStatic && body.transform.position.y < bounds - body.radius - 1) {
+			body.AddForce (body.mass * gravity * Vector3.down);
+		} else if ((gravity < 0) && !body.isStatic && body.transform.position.y > body.radius + 1) {
+			body.AddForce (body.mass * gravity * Vector3.down);
 		}
 		body.applyGravity = true;
 		body.SumForces ();
@@ -494,20 +498,7 @@ public class NarrowPhase : MonoBehaviour {
 			avgVelocity += physicsEngines [i].velocityVector.magnitude;
 		}
 		avgVelocity /= physicsEngines.Length;
-		/*
-		for (int i = 0; i < physicsEngines.Length; i++) {
-			float velBefore = physicsEngines [i].oldVelMag;
-			stepSimulation (physicsEngines [i]);
-			float velAfter = physicsEngines [i].velocityVector.magnitude;
-			if (velCount < physicsEngines.Length) {
-				velCount++;
-				avgVelocity = avgVelocity + ((velAfter - avgVelocity) / velCount);
-			} else {
-				avgVelocity = ((avgVelocity * velBefore) - avgVelocity) / (velCount - 1);
-				avgVelocity = avgVelocity + ((velAfter - avgVelocity) / velCount);
-			}
-		}
-		*/
+
 		n++;
 		avgProcessCount = avgProcessCount + ((processCount - avgProcessCount) / n);
 	}
@@ -609,6 +600,7 @@ public class NarrowPhase : MonoBehaviour {
 			col.body1.velocityVector += ((j * vCollisionNormal) / col.body1.mass);
 		}
 	}
+	#region testing
 	int recordCount = 0;
 	private IEnumerator record(){
 		while (write) {
@@ -904,11 +896,11 @@ public class NarrowPhase : MonoBehaviour {
 		stdDev = Mathf.Pow ((float)stdDev, 0.5f);
 		return stdDev;
 	}
-
-	//Draw bounds
-	void OnDrawGizmos(){
-		Gizmos.color = Color.red;
-		Gizmos.DrawWireCube (new Vector3 ((bounds) / 2, (bounds) / 2, (bounds) / 2), new Vector3 (bounds - boundsTol, bounds - boundsTol, bounds - boundsTol));
-	}
-
+	#endregion
+//	//Draw bounds
+//	void OnGUI(){
+//		Gizmos.color = Color.red;
+//		Gizmos.DrawWireCube (new Vector3 ((bounds) / 2, (bounds) / 2, (bounds) / 2), new Vector3 (bounds - boundsTol, bounds - boundsTol, bounds - boundsTol));
+//	}
+//
 }

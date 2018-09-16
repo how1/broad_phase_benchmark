@@ -31,7 +31,7 @@ public class CreateObjects : MonoBehaviour {
 	//timing variables
 	int frames = 0;
 	bool write = true;
-	bool start;
+	bool start = true;
 
 	int frameCount = 0;
 	float nextUpdate = 0.0f;
@@ -55,8 +55,15 @@ public class CreateObjects : MonoBehaviour {
 
 	public void makeObjects(){
 		narrowPhase = GetComponent<NarrowPhase> ();
+//		narrowPhase = gameObject.AddComponent<NarrowPhase>();
+//		narrowPhase.sweepAndPrune = GetComponent<SweepAndPrune> ();
+//		narrowPhase.octTree = GetComponent<OctTreeAlg> ();
+//		narrowPhase.mask = GetComponent<SpatialMasking> ();
+//		narrowPhase.simple = GetComponent<Simple> ();
+//		narrowPhase.boundsThing = GetComponent<Bounds> ();
+
 		//GameControl.gameControl.createObjects = this;
-		simple = gameObject.GetComponent<Simple>();
+		simple = GetComponent<Simple>();
 		simple.narrowPhase = narrowPhase;
 		mass = GameControl.gameControl.objectMass;
 		speed = GameControl.gameControl.speed;
@@ -85,7 +92,11 @@ public class CreateObjects : MonoBehaviour {
 			particle.name = "Sphere (" + count + ")";
 			count++;
 			HRigidBody h = particle.AddComponent<HRigidBody> ();
-			h.mass = mass;
+			if (GameControl.gameControl.massScales) {
+				h.mass = (4f/3f) * Mathf.PI * Mathf.Pow (radius, 3) * mass;
+			} else {
+				h.mass = mass;
+			}
 			h.velocityExponent = 2.0f;
 			h.drag = drag;
 			h.isStatic = false;
@@ -272,9 +283,7 @@ public class CreateObjects : MonoBehaviour {
 				}
 			}
 			loop++;
-			Debug.Log (loop);
 			if (loop > 100) {
-				Debug.Log (loop + "over");
 				return 1;
 			}
 		}

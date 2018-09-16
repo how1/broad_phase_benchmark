@@ -9,10 +9,10 @@ public class GameControl : MonoBehaviour {
 
 	public static GameControl gameControl;
 	public int bounds = 32; //size of scene
-	public int numObjects = 1; 
-	public int whichBroad = 0; //which broad-phase algorithm: 0-BruteForce, 1-SpatialMasking, 2-Oct-Tree, 3-SAP, 4-Adaptive
+	public int numObjects = 10; 
+	public int whichBroad = 3; //which broad-phase algorithm: 0-BruteForce, 1-SpatialMasking, 2-Oct-Tree, 3-SAP, 4-Adaptive
 	public int adaptBroad = 0; //
-	public float radius = 1f; //size of objects
+	public float radius = 0.5f; //size of objects
 	public float radiusRange = 0; //range of radii size
 	public float avgRadius = 1f;
 	public float maxRadius = 1;
@@ -22,7 +22,9 @@ public class GameControl : MonoBehaviour {
 	//public int spacing = 3;
 	public string fileName = "NTimeTest0"; //file being written to if testing (NarrowPhase.testing)
 	public float objectMass = 1.0f; //object mass
-	public bool gravity;
+	public float gravity;
+	public bool objectGravity = false;
+	public bool massScales = false;
 	[Range(0,1)]
 	public float cof;
 	public float colTol;
